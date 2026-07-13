@@ -7,9 +7,12 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^3.1",
         "darkaonline/l5-swagger": "*",
         "laravel/framework": "^11.31",
+        "laravel/sanctum": "^4.3",
         "laravel/tinker": "^2.9",
+        "maatwebsite/excel": "3.1.69",
         "mongodb/laravel-mongodb": "^5.8"
     },
     "require-dev": {

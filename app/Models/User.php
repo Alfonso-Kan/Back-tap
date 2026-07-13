@@ -2,48 +2,63 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Models\Concerns\Auditable;
+use App\Models\Concerns\HasSequentialCode;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use MongoDB\Laravel\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use Auditable;
+    use HasApiTokens;
+    use HasSequentialCode;
+    use Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    protected static string $codigoPrefix = 'USR';
+
+    protected $connection = 'mongodb';
+
+    protected $collection = 'users';
+
     protected $fillable = [
-        'name',
-        'email',
+        'codigo',
+        'nombre',
+        'usuario',
         'password',
+        'telefono',
+        'foto_perfil',
+        'perfil_ids',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    protected $casts = [
+        'password' => 'hashed',
+    ];
+
+    public function perfiles(): Collection
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return Perfil::whereIn('_id', $this->perfil_ids ?? [])->get();
+    }
+
+    public function seccionesAccesibles(): Collection
+    {
+        $seccionIds = $this->perfiles()
+            ->pluck('seccion_ids')
+            ->flatten()
+            ->unique()
+            ->values()
+            ->all();
+
+        return Seccion::whereIn('_id', $seccionIds)->get();
+    }
+
+    public function tieneAccesoASeccion(string $codigo): bool
+    {
+        return $this->seccionesAccesibles()->contains('codigo', $codigo);
     }
 }
