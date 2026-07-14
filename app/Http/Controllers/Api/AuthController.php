@@ -61,7 +61,7 @@ class AuthController extends Controller
     #[OA\Post(
         path: '/api/register',
         tags: ['Auth'],
-        summary: 'Registrarse (se crea con perfil Capturista, acceso único a Productos)',
+        summary: 'Registrarse (se crea con perfil Administrador, acceso a todas las secciones)',
         requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(
             required: ['nombre', 'usuario', 'password', 'password_confirmation'],
             properties: [
@@ -81,11 +81,9 @@ class AuthController extends Controller
     {
         $data = $request->validated();
 
-        $seccionProductos = Seccion::where('codigo', 'productos')->firstOrFail();
-
-        $capturista = Perfil::firstOrCreate(
-            ['nombre' => 'Capturista'],
-            ['seccion_ids' => [(string) $seccionProductos->_id]],
+        $administrador = Perfil::firstOrCreate(
+            ['nombre' => 'Administrador'],
+            ['seccion_ids' => Seccion::all()->pluck('_id')->map(fn ($id) => (string) $id)->all()],
         );
 
         $user = User::create([
@@ -93,7 +91,7 @@ class AuthController extends Controller
             'usuario' => $data['usuario'],
             'password' => $data['password'],
             'telefono' => $data['telefono'] ?? null,
-            'perfil_ids' => [(string) $capturista->_id],
+            'perfil_ids' => [(string) $administrador->_id],
         ]);
 
         $token = $user->createToken('api')->plainTextToken;

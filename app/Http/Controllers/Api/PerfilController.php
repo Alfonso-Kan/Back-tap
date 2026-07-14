@@ -94,6 +94,11 @@ class PerfilController extends Controller
     public function update(PerfilRequest $request, string $id): JsonResponse
     {
         $perfil = Perfil::findOrFail($id);
+
+        if ($perfil->nombre === 'Administrador') {
+            abort(403, 'El perfil Administrador no se puede editar.');
+        }
+
         $perfil->update($request->validated());
 
         return response()->json($this->presentarDetalle($perfil->fresh()));
@@ -109,7 +114,13 @@ class PerfilController extends Controller
     )]
     public function destroy(string $id): Response
     {
-        Perfil::findOrFail($id)->delete();
+        $perfil = Perfil::findOrFail($id);
+
+        if ($perfil->nombre === 'Administrador') {
+            abort(403, 'El perfil Administrador no se puede eliminar.');
+        }
+
+        $perfil->delete();
 
         return response()->noContent();
     }
@@ -147,6 +158,7 @@ class PerfilController extends Controller
             'codigo' => $perfil->codigo,
             'nombre' => $perfil->nombre,
             'fecha_creacion' => optional($perfil->created_at)->toIso8601String(),
+            'protegido' => $perfil->nombre === 'Administrador',
         ];
     }
 

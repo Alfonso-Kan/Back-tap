@@ -129,6 +129,11 @@ class UsuarioController extends Controller
     public function update(UpdateUsuarioRequest $request, string $id): JsonResponse
     {
         $user = User::findOrFail($id);
+
+        if ($user->usuario === 'admin@tapdemo.com') {
+            abort(403, 'El usuario admin@tapdemo.com no se puede editar.');
+        }
+
         $data = $request->validated();
 
         if ($request->hasFile('foto_perfil')) {
@@ -154,6 +159,10 @@ class UsuarioController extends Controller
     public function destroy(string $id): Response
     {
         $user = User::findOrFail($id);
+
+        if ($user->usuario === 'admin@tapdemo.com') {
+            abort(403, 'El usuario admin@tapdemo.com no se puede eliminar.');
+        }
 
         if ($user->foto_perfil) {
             Storage::disk('public')->delete($user->foto_perfil);
@@ -198,6 +207,7 @@ class UsuarioController extends Controller
             'usuario' => $user->usuario,
             'nombre' => $user->nombre,
             'fecha_creacion' => optional($user->created_at)->toIso8601String(),
+            'protegido' => $user->usuario === 'admin@tapdemo.com',
         ];
     }
 
