@@ -8,7 +8,7 @@ class Bitacora extends Model
 {
     protected $connection = 'mongodb';
 
-    protected $collection = 'bitacoras';
+    protected $table = 'bitacoras';
 
     public $timestamps = false;
 

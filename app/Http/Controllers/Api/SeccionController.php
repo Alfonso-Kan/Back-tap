@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\SeccionRequest;
 use App\Models\Seccion;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
 use OpenApi\Attributes as OA;
 
 class SeccionController extends Controller
@@ -25,30 +24,6 @@ class SeccionController extends Controller
         ]);
     }
 
-    #[OA\Post(
-        path: '/api/secciones',
-        tags: ['Secciones'],
-        summary: 'Crear sección',
-        security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(
-            required: ['codigo', 'nombre'],
-            properties: [
-                new OA\Property(property: 'codigo', type: 'string'),
-                new OA\Property(property: 'nombre', type: 'string'),
-            ],
-        )),
-        responses: [
-            new OA\Response(response: 201, description: 'Sección creada'),
-            new OA\Response(response: 422, description: 'Error de validación'),
-        ],
-    )]
-    public function store(SeccionRequest $request): JsonResponse
-    {
-        $seccion = Seccion::create($request->validated());
-
-        return response()->json($this->presentar($seccion), 201);
-    }
-
     #[OA\Get(
         path: '/api/secciones/{id}',
         tags: ['Secciones'],
@@ -65,15 +40,12 @@ class SeccionController extends Controller
     #[OA\Put(
         path: '/api/secciones/{id}',
         tags: ['Secciones'],
-        summary: 'Editar sección',
+        summary: 'Editar el nombre de una sección (el código es fijo, no editable)',
         security: [['bearerAuth' => []]],
         parameters: [new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string'))],
         requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(
-            required: ['codigo', 'nombre'],
-            properties: [
-                new OA\Property(property: 'codigo', type: 'string'),
-                new OA\Property(property: 'nombre', type: 'string'),
-            ],
+            required: ['nombre'],
+            properties: [new OA\Property(property: 'nombre', type: 'string')],
         )),
         responses: [
             new OA\Response(response: 200, description: 'Sección actualizada'),
@@ -86,21 +58,6 @@ class SeccionController extends Controller
         $seccion->update($request->validated());
 
         return response()->json($this->presentar($seccion->fresh()));
-    }
-
-    #[OA\Delete(
-        path: '/api/secciones/{id}',
-        tags: ['Secciones'],
-        summary: 'Eliminar sección',
-        security: [['bearerAuth' => []]],
-        parameters: [new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string'))],
-        responses: [new OA\Response(response: 204, description: 'Sección eliminada')],
-    )]
-    public function destroy(string $id): Response
-    {
-        Seccion::findOrFail($id)->delete();
-
-        return response()->noContent();
     }
 
     protected function presentar(Seccion $seccion): array

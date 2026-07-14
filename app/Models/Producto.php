@@ -15,7 +15,7 @@ class Producto extends Model
 
     protected $connection = 'mongodb';
 
-    protected $collection = 'productos';
+    protected $table = 'productos';
 
     protected $fillable = [
         'codigo',

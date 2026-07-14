@@ -2,10 +2,14 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Seccion;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
+/**
+ * Secciones are the app's fixed set of screens (each has a matching Angular
+ * route and an `EnsureSeccionAccess` middleware group keyed by codigo), so
+ * they can't be freely created/deleted from the UI — only the display
+ * nombre is editable here. codigo is immutable once seeded.
+ */
 class SeccionRequest extends FormRequest
 {
     public function authorize(): bool
@@ -16,7 +20,6 @@ class SeccionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'codigo' => ['required', 'string', 'max:100', Rule::unique(Seccion::class, 'codigo')->ignore($this->route('id'), '_id')],
             'nombre' => ['required', 'string', 'max:255'],
         ];
     }

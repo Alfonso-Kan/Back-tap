@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Mail\CredencialesRecuperadas;
+use App\Mail\CredencialesAcceso;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -111,7 +111,7 @@ class AuthController extends Controller
         $nuevaPassword = Str::password(12);
         $user->update(['password' => $nuevaPassword]);
 
-        Mail::to($user->usuario)->send(new CredencialesRecuperadas($user->usuario, $nuevaPassword));
+        Mail::to($user->usuario)->send(new CredencialesAcceso($user->usuario, $nuevaPassword));
 
         return response()->json(['message' => 'Se enviaron las nuevas credenciales al correo registrado.']);
     }

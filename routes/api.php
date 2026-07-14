@@ -45,12 +45,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [PerfilController::class, 'destroy']);
     });
 
+    // Secciones no admite alta/baja: son las 5 pantallas fijas del sistema
+    // (ligadas a rutas y middleware de acceso reales); solo se puede editar el nombre.
     Route::middleware('seccion:secciones')->prefix('secciones')->group(function () {
         Route::get('/', [SeccionController::class, 'index']);
-        Route::post('/', [SeccionController::class, 'store']);
         Route::get('/{id}', [SeccionController::class, 'show']);
         Route::put('/{id}', [SeccionController::class, 'update']);
-        Route::delete('/{id}', [SeccionController::class, 'destroy']);
     });
 
     Route::middleware('seccion:bitacora')->prefix('bitacora')->group(function () {

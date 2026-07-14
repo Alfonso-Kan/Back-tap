@@ -16,7 +16,11 @@ class Perfil extends Model
 
     protected $connection = 'mongodb';
 
-    protected $collection = 'perfiles';
+    // $table (not $collection - MongoDB\Laravel\Eloquent\Model doesn't read
+    // that property) fixes the collection Eloquent actually queries, since
+    // its default English pluralization of "Perfil" would otherwise be
+    // "perfils".
+    protected $table = 'perfiles';
 
     protected $fillable = [
         'codigo',

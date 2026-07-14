@@ -6,7 +6,7 @@ use App\Exports\UsuarioExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUsuarioRequest;
 use App\Http\Requests\UpdateUsuarioRequest;
-use App\Mail\CredencialesRecuperadas;
+use App\Mail\CredencialesAcceso;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
@@ -74,7 +74,7 @@ class UsuarioController extends Controller
 
         $user = User::create($data);
 
-        Mail::to($user->usuario)->send(new CredencialesRecuperadas($user->usuario, $passwordGenerada));
+        Mail::to($user->usuario)->send(new CredencialesAcceso($user->usuario, $passwordGenerada, esNuevoUsuario: true));
 
         return response()->json($this->presentarDetalle($user), 201);
     }
