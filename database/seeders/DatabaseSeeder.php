@@ -27,6 +27,13 @@ class DatabaseSeeder extends Seeder
             ['seccion_ids' => $secciones->pluck('_id')->map(fn ($id) => (string) $id)->all()],
         );
 
+        $seccionProductos = $secciones->firstWhere('codigo', 'productos');
+
+        Perfil::firstOrCreate(
+            ['nombre' => 'Capturista'],
+            ['seccion_ids' => [(string) $seccionProductos->_id]],
+        );
+
         if (! User::where('usuario', 'admin@tapdemo.com')->exists()) {
             User::create([
                 'nombre' => 'Administrador del Sistema',

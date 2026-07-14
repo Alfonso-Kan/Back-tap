@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\RegisterRequest;
 use App\Mail\CredencialesAcceso;
+use App\Models\Perfil;
+use App\Models\Seccion;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -53,6 +56,52 @@ class AuthController extends Controller
             'token' => $token,
             'user' => $this->serializeUser($user),
         ]);
+    }
+
+    #[OA\Post(
+        path: '/api/register',
+        tags: ['Auth'],
+        summary: 'Registrarse (se crea con perfil Capturista, acceso único a Productos)',
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(
+            required: ['nombre', 'usuario', 'password', 'password_confirmation'],
+            properties: [
+                new OA\Property(property: 'nombre', type: 'string'),
+                new OA\Property(property: 'usuario', type: 'string', format: 'email'),
+                new OA\Property(property: 'password', type: 'string', format: 'password'),
+                new OA\Property(property: 'password_confirmation', type: 'string', format: 'password'),
+                new OA\Property(property: 'telefono', type: 'string', description: 'Con código de país, ej. +52 5512345678'),
+            ],
+        )),
+        responses: [
+            new OA\Response(response: 201, description: 'Token emitido y datos del usuario'),
+            new OA\Response(response: 422, description: 'Error de validación'),
+        ],
+    )]
+    public function register(RegisterRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+
+        $seccionProductos = Seccion::where('codigo', 'productos')->firstOrFail();
+
+        $capturista = Perfil::firstOrCreate(
+            ['nombre' => 'Capturista'],
+            ['seccion_ids' => [(string) $seccionProductos->_id]],
+        );
+
+        $user = User::create([
+            'nombre' => $data['nombre'],
+            'usuario' => $data['usuario'],
+            'password' => $data['password'],
+            'telefono' => $data['telefono'] ?? null,
+            'perfil_ids' => [(string) $capturista->_id],
+        ]);
+
+        $token = $user->createToken('api')->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user' => $this->serializeUser($user),
+        ], 201);
     }
 
     #[OA\Post(
