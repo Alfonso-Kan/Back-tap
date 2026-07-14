@@ -12,6 +12,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -74,9 +75,18 @@ class UsuarioController extends Controller
 
         $user = User::create($data);
 
-        Mail::to($user->usuario)->send(new CredencialesAcceso($user->usuario, $passwordGenerada, esNuevoUsuario: true));
+        $correoEnviado = true;
 
-        return response()->json($this->presentarDetalle($user), 201);
+        try {
+            Mail::to($user->usuario)->send(new CredencialesAcceso($user->usuario, $passwordGenerada, esNuevoUsuario: true));
+        } catch (\Throwable $e) {
+            $correoEnviado = false;
+            Log::warning("No se pudo enviar el correo de credenciales a {$user->usuario}: {$e->getMessage()}");
+        }
+
+        return response()->json(array_merge($this->presentarDetalle($user), [
+            'correo_enviado' => $correoEnviado,
+        ]), 201);
     }
 
     #[OA\Get(
