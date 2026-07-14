@@ -13,5 +13,6 @@ fi
 
 php artisan migrate --force
 php artisan db:seed --force
+php artisan l5-swagger:generate
 
 exec php artisan serve --host=0.0.0.0 --port="${PORT:-8080}"
