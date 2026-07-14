@@ -1,6 +1,12 @@
 #!/bin/sh
 set -e
 
+# Laravel's sqlite connector requires the file to already exist -- it will
+# not create it on its own (needed for Sanctum's personal_access_tokens).
+DB_FILE="${DB_DATABASE:-database/database.sqlite}"
+mkdir -p "$(dirname "$DB_FILE")"
+touch "$DB_FILE"
+
 if [ ! -L public/storage ]; then
   php artisan storage:link
 fi
