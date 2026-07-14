@@ -13,6 +13,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Railway (y la mayoria de PaaS) terminan TLS en su proxy y reenvian
+        // HTTP puro al contenedor; sin esto Laravel genera URLs de assets/
+        // rutas en http:// aunque el sitio se sirva en https://.
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'seccion' => EnsureSeccionAccess::class,
         ]);
